@@ -18,7 +18,7 @@ class Label:
         raise ValueError('{} is a readonly class.'.format(instance))
 
     def __str__(self):
-        return '{}: {}'.format(self.__label, self.__to_text(self.__value))
+        return '{}: {}'.format(self.__label, self.__to_text())
 
     def __call__(self, *args, **kwargs):
         return self.__value
@@ -26,13 +26,11 @@ class Label:
     def __repr__(self):
         return '{type}: {value}'.format(type=type(self.__value), value=self.__value)
 
-    @staticmethod
-    def __to_value(text):
+    def __to_value(self, text):
         return str(text)
 
-    @staticmethod
-    def __to_text(value):
-        return str(value)
+    def __to_text(self):
+        return str(self.__value)
 
     def set(self, value: str):
         self.__value = self.__to_value(value)
@@ -41,58 +39,55 @@ class Label:
 class ScaledBorderAndShadow(Label):
     __label = 'ScaledBorderAndShadow'
 
-    @staticmethod
-    def __to_value(value):
+    def __to_value(self, text):
         """
         Parameters
         ----------
-        value : str
+        text : str
             Text includes Yes or No.
         """
-        return bool(value.lower == 'yes')
+        return bool(text.lower == 'yes')
 
     def __to_text(self):
         return 'Yes' if self.__value else 'No'
 
 
-class Marked(ReadOnly):
-    def __init__(self, text: str):
+class Marked(Label):
+    __label = 'Marked'
+
+    def __to_value(self, text):
         """
         Parameters
         ----------
         text : str
-            Text includes 0 or 1.
+            Text only includes 0 or 1.
         """
-        self.enabled = bool(int(text))
+        return bool(int(text))
+
+    def __to_text(self):
+        return '1' if self.__value else '0'
 
     def __repr__(self):
-        return 'Enabled' if self.enabled else 'Disabled'
-
-    def __str__(self):
-        return '1' if self.enabled else '0'
-
-    def __bool__(self):
-        return self.enabled
-
-    def set(self, enable: bool) -> None:
-        self.enabled = enable
+        return '{type}: {value} | {status}'.format(
+            type=type(self.__value),
+            value=self.__value,
+            status='Enabled' if self.__value else 'Disabled'
+        )
 
 
-class Bold(ReadOnly):
+# TODO
+class Bold(Label):
     DEFAULT = -1
     DISABLED = 0
     ENABLED = 1
 
-    def __init__(self, text: Union[str, int]):
+    def __to_value(self, text):
         """
         Parameters
         ----------
-        text : Union[str, int]
+        text : str
             Text includes -1 0 or 1, which shows the state of bold.
         """
-        if isinstance(text, str):
-            self.state = int(text)
-
         # Process nonstandard value
         if self.state != self.DISABLED or self.state != self.ENABLED:
             self.state = self.DEFAULT
