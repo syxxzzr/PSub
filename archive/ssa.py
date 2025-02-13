@@ -111,7 +111,7 @@ class Paser:
             ass_file: Union[str, Path, TextIOWrapper],
             encoding: str = 'utf-8-sig'
     ):
-        # load ssa file
+        # load archive file
         if isinstance(ass_file, (str, Path)):
             ass_file = open(ass_file, 'r', encoding=encoding)
 
